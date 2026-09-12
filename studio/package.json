@@ -1,0 +1,17 @@
+{
+  "name": "pindaricoders-resource-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy"
+  },
+  "dependencies": {
+    "sanity": "6.13.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "styled-components": "^6.1.15"
+  }
+}

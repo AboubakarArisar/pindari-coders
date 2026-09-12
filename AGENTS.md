@@ -10,4 +10,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project identity
 
-Use the public names **Abou Bakar** and **Muhammad Abdullah**, with no role labels beside their names. They started PindariCoders to help others learn coding and share tech news, first on Facebook and YouTube. Muhammad Abdullah's supplied portrait is in `public/muhammad-abdullah.jpeg` and his portfolio is https://muhammad-abdullah.dev/. Resources are managed in `lib/resources.js` until a future authenticated admin panel is requested; do not expose an unauthenticated editor.
+Use the public names **Abou Bakar** and **Muhammad Abdullah**, with no role labels beside their names. They started PindariCoders to help others learn coding and share tech news, first on Facebook and YouTube. Muhammad Abdullah's supplied portrait is in `public/muhammad-abdullah.jpeg` and his portfolio is https://muhammad-abdullah.dev/. Resources are managed in the authenticated Sanity Studio in `studio/` (project `uffqpes0`, dataset `production`). The website reads published resources without a token. Never expose an editing token or an unauthenticated editor.
