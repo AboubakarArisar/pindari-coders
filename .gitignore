@@ -4,3 +4,6 @@ out/
 .sites-runtime/
 .env*
 !.env.example
+.openai/
+CLAUDE.md
+AGENTS.md
