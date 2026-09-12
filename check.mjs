@@ -44,6 +44,9 @@ const story = readFileSync('out/story/index.html', 'utf8');
 assert(story.includes('Abou Bakar') && story.includes('Muhammad Abdullah'));
 assert(!story.includes('Abou Bakar Arisar') && !story.includes('Abdullah Arain') && !/co-founder/i.test(story));
 assert(!existsSync('out/notes/index.html'), 'Field notes should be removed');
+assert(!story.includes('where the idea first found a home'));
+assert.equal((story.match(/href="https:\/\/web.facebook.com\/100091890139657\/"/g) || []).length, 1);
+for (const id of ['grid', 'box', 'shadow', 'transform']) assert(html.includes('id="frontend-' + id + '"'));
 assert(!story.includes('temporary photo'));
 assert(story.includes('https://muhammad-abdullah.dev/'));
 assert(story.includes('/muhammad-abdullah.jpeg'));
@@ -100,7 +103,7 @@ savedProgress = '{broken'; renderProgress(); effects.forEach(effect => effect())
 assert.match(renderProgress().storageMessage, /could not be loaded/);
 storageBlocked = true; renderProgress().toggleComplete();
 assert.match(renderProgress().storageMessage, /this visit only/);
-assert.equal(labDomains.reduce((total,domain)=>total+domain.modules.length,0),14);
+assert.equal(labDomains.reduce((total,domain)=>total+domain.modules.length,0),18);
 const algorithmsPage = readFileSync('out/lab/algorithms/index.html', 'utf8');
 for (let module = 1; module <= 7; module++) assert(algorithmsPage.includes(`id="module-0${module}"`));
 assert.equal(inspectJson('[1,2]').count,2);
