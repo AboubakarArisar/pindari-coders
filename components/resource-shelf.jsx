@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RESOURCE_ENDPOINT, normalizeResources, resourcePage } from '../lib/resources';
 
 export default function ResourceShelf() {
@@ -8,6 +8,7 @@ export default function ResourceShelf() {
   const [feed, setFeed] = useState({ state: 'loading', items: [] });
   const [filters, setFilters] = useState({ category: 'All', pricing: 'All' });
   const [page, setPage] = useState(1);
+  const resultsRef = useRef(null);
   useEffect(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 12000);
@@ -33,6 +34,10 @@ export default function ResourceShelf() {
     setFilters(current => ({ ...current, [name]: value }));
     setPage(1);
   }
+  function changePage(nextPage) {
+    setPage(nextPage);
+    requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }
   return <section aria-label="Resource collection" aria-busy={feed.state === 'loading'}>
     <div role="status">{feed.state === 'loading' && <p className={feed.items.length ? 'feed-status' : 'sr-only'}>Loading resources…</p>}{feed.state === 'error' && <p className="feed-status">The resource shelf couldn’t be refreshed. {feed.items.length > 0 && 'Previous results are shown below.'} <button className="text-button" onClick={() => setRefresh(value => value + 1)}>try again ↻</button></p>}</div>
     {feed.state === 'loading' && !feed.items.length && <div className="resource-grid resource-skeleton-grid" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <article className="resource-skeleton" key={index}><div className="skeleton-logo"><span /></div><div><i /><b /><i /><i /></div></article>)}</div>}
@@ -42,8 +47,10 @@ export default function ResourceShelf() {
         <label>Access<select value={filters.pricing} onChange={event => filter('pricing', event.target.value)}>{prices.map(price => <option key={price}>{price}</option>)}</select></label>
         <p aria-live="polite"><strong>{results.total}</strong> {results.total === 1 ? 'resource' : 'resources'} found</p>
       </div>
-      {results.total > 0 ? <div className="resource-grid">{results.items.map((resource, index) => <article className="resource-card" key={resource.id} style={{ '--card-index': index }}><a href={resource.url} target="_blank" rel="noopener noreferrer"><div className="resource-logo"><img src={resource.image} alt={resource.alt} width="512" height="512" loading="lazy"/></div><div className="resource-card-body"><div className="news-topic-tags">{resource.category && <span>{resource.category}</span>}{resource.pricing && <span>{resource.pricing}</span>}</div><h2>{resource.name}<span aria-hidden="true">↗</span></h2><p>{resource.description}</p><span className="resource-visit">visit resource <b aria-hidden="true">↗</b></span></div></a></article>)}</div> : <div className="resource-no-results"><p>No resources match these filters yet.</p><button className="text-button" onClick={() => { setFilters({ category: 'All', pricing: 'All' }); setPage(1); }}>show all resources ↗</button></div>}
-      {results.pages > 1 && <nav className="news-pagination" aria-label="Resource pages"><button onClick={() => setPage(results.current - 1)} disabled={results.current === 1}>← previous</button><span>page {results.current} of {results.pages}</span><button onClick={() => setPage(results.current + 1)} disabled={results.current === results.pages}>next →</button></nav>}
+      <div ref={resultsRef} className="resource-results" style={{ scrollMarginTop: '110px' }}>
+        {results.total > 0 ? <div className="resource-grid">{results.items.map((resource, index) => <article className="resource-card" key={resource.id} style={{ '--card-index': index }}><a href={resource.url} target="_blank" rel="noopener noreferrer"><div className="resource-logo"><img src={resource.image} alt={resource.alt} width="512" height="512" loading="lazy"/></div><div className="resource-card-body"><div className="news-topic-tags">{resource.category && <span>{resource.category}</span>}{resource.pricing && <span>{resource.pricing}</span>}</div><h2>{resource.name}<span aria-hidden="true">↗</span></h2><p>{resource.description}</p><span className="resource-visit">visit resource <b aria-hidden="true">↗</b></span></div></a></article>)}</div> : <div className="resource-no-results"><p>No resources match these filters yet.</p><button className="text-button" onClick={() => { setFilters({ category: 'All', pricing: 'All' }); setPage(1); }}>show all resources ↗</button></div>}
+        {results.pages > 1 && <nav className="news-pagination" aria-label="Resource pages"><button onClick={() => changePage(results.current - 1)} disabled={results.current === 1}>← previous</button><span>page {results.current} of {results.pages}</span><button onClick={() => changePage(results.current + 1)} disabled={results.current === results.pages}>next →</button></nav>}
+      </div>
     </>}
     {feed.state === 'ready' && !feed.items.length && <section className="resource-empty"><span className="shelf-symbol" aria-hidden="true">[ + ]</span><p className="eyebrow">A SHELF WORTH FILLING CAREFULLY</p><h2>the first finds are still on their way.</h2><p>We’re making room for useful libraries and tools, with a clear explanation of what each one helps you do. Check back for our first additions.</p><Link className="button primary" href="/lab/">explore the lab meanwhile ↗</Link></section>}
   </section>;
