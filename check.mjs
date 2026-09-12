@@ -5,7 +5,7 @@ import { roadmaps, findRoadmap } from './lib/roadmaps.js';
 import { newsUrl, newsRequests, normalizeNews, mergeNews, newsPage, NEWS_WINDOW } from './lib/news.js';
 import { labDomains, inspectJson, simulateHttp, parseNumbers, bubbleFrames, binarySteps, chunkText, wordSimilarity } from './lib/lab-modules.js';
 import { sortFrames, linearFrames, gcdFrames, breadthFrames } from './lib/algorithm-frames.js';
-import { normalizeResources, RESOURCE_ENDPOINT } from './lib/resources.js';
+import { normalizeResources, resourcePage, RESOURCE_ENDPOINT } from './lib/resources.js';
 const validResource = { id: 'resource-1', name: 'A tool', description: 'Useful for learning', url: 'https://example.com/', image: 'https://cdn.sanity.io/images/uffqpes0/production/example-640x360.png', alt: 'Tool preview', category: 'Frontend', pricing: 'Free' };
 assert.equal(normalizeResources({ result: [validResource, validResource] }).length, 1);
 assert.equal(normalizeResources({ result: [{ ...validResource, id: 'drafts.resource-1' }] }).length, 0);
@@ -14,6 +14,11 @@ assert.equal(normalizeResources({ result: [{ ...validResource, image: 'https://e
 assert.equal(normalizeResources({ result: [null, {}] }).length, 0);
 assert.throws(() => normalizeResources({ error: 'Unavailable' }));
 assert.equal(new URL(RESOURCE_ENDPOINT).searchParams.get('perspective'), 'published');
+const resourceItems = Array.from({ length: 20 }, (_, index) => ({ ...validResource, id: `resource-${index}`, category: index < 12 ? 'AI' : 'Backend', pricing: index % 2 ? 'Free' : 'Paid' }));
+assert.equal(resourcePage(resourceItems, { category: 'AI' }).total, 12);
+assert.equal(resourcePage(resourceItems, { category: 'AI', pricing: 'Free' }).total, 6);
+assert.equal(resourcePage(resourceItems, { page: 99 }).current, 3);
+assert.equal(resourcePage(resourceItems, { page: 2 }).items.length, 9);
 
 for (const algorithm of ['selection', 'insertion']) {
   for (const values of [[8, 3, 6, 1], [3, -2, 3, 0], [1, 2, 3], [4, 3, 2, 1]]) {
