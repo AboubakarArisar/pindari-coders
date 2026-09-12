@@ -17,7 +17,10 @@ const story = readFileSync('out/story/index.html', 'utf8');
 assert(story.includes('Abou Bakar') && story.includes('Muhammad Abdullah'));
 assert(!story.includes('Abou Bakar Arisar') && !story.includes('Abdullah Arain') && !/co-founder/i.test(story));
 assert(!existsSync('out/notes/index.html'), 'Field notes should be removed');
-assert(story.includes('temporary photo'));
+assert(!story.includes('temporary photo'));
+assert(story.includes('https://muhammad-abdullah.dev/'));
+assert(story.includes('/muhammad-abdullah.jpeg'));
+assert(home.includes('/muhammad-abdullah.jpeg'));
 const elements = new Map();
 for (const match of html.matchAll(/id="([^"]+)"/g)) {
   assert(!elements.has(match[1]), `Duplicate ID: ${match[1]}`);
@@ -38,11 +41,38 @@ for (const roadmap of roadmaps) {
   assert.equal(findRoadmap(roadmap.slug), roadmap);
   assert(roadmap.steps.length > 0);
   for (const step of roadmap.steps) {
-    assert(step.title && step.description && step.task && step.topics.length && step.resources.length);
+    assert(step.checkpoint && step.title && step.description && step.task && step.topics.length && step.resources.length);
     for (const resource of step.resources) assert(resource.url.startsWith('/') || new URL(resource.url).protocol === 'https:');
   }
 }
 assert.equal(findRoadmap('missing-path'), undefined);
+// Exercise the client state/storage flow without requiring a browser or test dependency.
+const explorerSource = readFileSync('components/roadmap-explorer.jsx', 'utf8');
+const explorerBody = explorerSource.slice(explorerSource.indexOf('export default function'), explorerSource.indexOf('  return <>')).replace('export default ', '');
+let hookIndex = 0, hookValues = [], effects = [], savedProgress = '[]', storageBlocked = false;
+const progressContext = {
+  useState(initial) { const index = hookIndex++; if (!(index in hookValues)) hookValues[index] = initial; return [hookValues[index], value => { hookValues[index] = value; }]; },
+  useEffect(effect) { effects.push(effect); }, useRef: () => ({ current: null }),
+  document: {}, console,
+  localStorage: { getItem() { return savedProgress; }, setItem(key, value) { if (storageBlocked) throw new Error('Storage blocked'); savedProgress = value; } },
+};
+vm.createContext(progressContext);
+vm.runInContext(explorerBody + '\nreturn { completed, ready, storageMessage, toggleComplete };\n}', progressContext);
+function renderProgress() { hookIndex = 0; effects = []; return progressContext.RoadmapExplorer({ roadmap: roadmaps[0] }); }
+renderProgress(); effects.forEach(effect => effect());
+let progressView = renderProgress();
+assert.equal(progressView.ready, true);
+progressView.toggleComplete();
+assert.deepEqual(JSON.parse(savedProgress), [roadmaps[0].steps[0].title]);
+renderProgress().toggleComplete();
+assert.deepEqual(JSON.parse(savedProgress), []);
+savedProgress = JSON.stringify([roadmaps[0].steps[0].title, roadmaps[0].steps[0].title, 'deleted step']);
+renderProgress(); effects.forEach(effect => effect());
+assert.equal(renderProgress().completed.length, 1);
+savedProgress = '{broken'; renderProgress(); effects.forEach(effect => effect());
+assert.match(renderProgress().storageMessage, /could not be loaded/);
+storageBlocked = true; renderProgress().toggleComplete();
+assert.match(renderProgress().storageMessage, /this visit only/);
 assert.equal(labDomains.reduce((total,domain)=>total+domain.modules.length,0),9);
 assert.equal(inspectJson('[1,2]').count,2);
 assert.equal(inspectJson('null').type,'null');

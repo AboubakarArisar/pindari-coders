@@ -8,7 +8,7 @@ The homepage is an introduction. `/learn` has separate domain pages; `/lab` link
 
 Resources are defined in `lib/resources.js` with `id`, `name`, `description`, `image`, and `url`. The shelf is intentionally empty until real entries are added. An authenticated admin panel is future work. The lab includes Flexbox, typography, contrast, JSON inspection, simulated HTTP responses, bubble sort, binary search, text chunking, and word-count cosine similarity. HTTP and text exercises run locally; they do not call a backend or AI model.
 
-Founder details are in `lib/founders.js`. Abdullah’s portfolio URL is not yet supplied. His temporary portrait is a copy of Abou Bakar’s image, as requested; replace `public/abdullah-arain.png` with his portrait later. The story page labels the photo as temporary.
+Founder details are in `lib/founders.js`. Both supplied portraits and portfolio links are active. Muhammad Abdullah’s photo is `public/muhammad-abdullah.jpeg`.
 
 ## Preview
 
@@ -30,6 +30,6 @@ The production static export is in `out`. All roadmap routes are generated at bu
 
 Roadmap content lives in `lib/roadmaps.js`; home content in `components/home.jsx`; frontend playgrounds in `components/lab.jsx`; other modules in `components/domain-modules.jsx` and `lib/lab-modules.js`; shared design in `app/globals.css`. The paths are original starting guides inspired by roadmap.sh, with links to primary learning resources and attribution. They are not a copy of roadmap.sh’s full curriculum.
 
-Inter and DM Mono load from Google Fonts with local fallbacks. Playground event listeners and agent tools are cleaned up when the frontend lab unmounts. Roadmap selections last for the current page visit; there are no accounts or saved progress.
+Inter and DM Mono load from Google Fonts with local fallbacks. Playground event listeners and agent tools are cleaned up when the frontend lab unmounts. Roadmap completion is saved in this browser with localStorage, with an explicit fallback when storage is unavailable. There are no accounts or cross-device progress. Each step includes a practical completion criterion. Motion respects reduced-motion settings.
 
 `npm run check` validates exported routes and assets plus focused interaction logic in a mock DOM. It does not replace browser or assistive-technology testing. Agent tools are checked in a mock context only.
