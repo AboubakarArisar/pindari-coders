@@ -4,8 +4,8 @@ import SiteFooter from '../components/site-footer';
 
 export const metadata = {
   title: { default: 'PindariCoders — a little corner for curious builders', template: '%s | PindariCoders' },
-  description: 'Learn coding, explore experiments, and discover trending AI stories with Abou Bakar Arisar and Abdullah Arain.',
-  authors: [{ name: 'Abou Bakar Arisar', url: 'https://aboubakarisar.tech/' }, { name: 'Abdullah Arain' }],
+  description: 'Learn coding, explore experiments, and discover trending AI stories with Abou Bakar and Muhammad Abdullah.',
+  authors: [{ name: 'Abou Bakar', url: 'https://aboubakarisar.tech/' }, { name: 'Muhammad Abdullah' }],
   icons: { icon: '/icon.svg' },
 };
 export const viewport = { themeColor: '#f7f8f2' };

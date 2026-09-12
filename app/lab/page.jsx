@@ -1,3 +1,4 @@
-import Lab from '../../components/lab';
-export const metadata = { title: 'The lab', description: 'Try the Flexbox, typography, and color contrast playgrounds at PindariCoders.' };
-export default function LabPage() { return <Lab />; }
+import Link from 'next/link';
+import { labDomains } from '../../lib/lab-modules';
+export const metadata = { title: 'The lab', description: 'Hands-on modules across Frontend, Backend, Algorithms, and AI. Choose a domain and start experimenting.' };
+export default function LabPage() { return <main className="wrap section"><div className="page-heading"><p className="eyebrow">THE LAB / 4 DOMAINS · 9 MODULES</p><h1>don’t just read it.<br /><span className="serif-word">play with it.</span></h1><p>See the data. Follow the steps. Change an input and find out why the result changes. Pick a domain and make a little discovery.</p></div><div className="domain-grid">{labDomains.map((domain,index) => <Link className="domain-card" href={`/lab/${domain.slug}/`} key={domain.slug}><div className="domain-card-top"><span className="roadmap-symbol" aria-hidden="true">{domain.symbol}</span><span className="eyebrow">0{index+1} / {domain.modules.length} MODULES</span></div><h2>{domain.title}</h2><p>{domain.description}</p><div className="topic-chips">{domain.modules.map(name=><span key={name}>{name}</span>)}</div><span className="roadmap-card-bottom">enter this lab <span aria-hidden="true">↗</span></span></Link>)}</div></main>; }
