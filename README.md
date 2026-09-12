@@ -2,11 +2,11 @@
 
 A developer workshop by **Abou Bakar** and **Muhammad Abdullah**. Always use these spellings.
 
-Built with Next.js App Router and React, preserving the original notebook design. Includes nine interactive modules across four lab domains, a resource shelf, and Frontend, Backend, React, and Next.js learning roadmaps.
+Built with Next.js App Router and React, preserving the original notebook design. Includes fourteen interactive modules across four lab domains, a resource shelf, and Frontend, Backend, React, and Next.js learning roadmaps.
 
 The homepage is an introduction. `/learn` has separate domain pages; `/lab` links to Frontend & Design, Backend & APIs, Algorithms, and AI & Text modules; `/resources` replaces Field Notes; `/story` tells the project's origin and return; `/trending` fetches live AI-related Hacker News stories through the public Algolia API when opened or refreshed. It ranks results from the past seven days by Hacker News points, deduplicates them, and handles empty, partial, and failed responses. Requests are aborted after 12 seconds or on unmount. There is no API key, background scheduler, or build-time news snapshot.
 
-Resources are defined in `lib/resources.js` with `id`, `name`, `description`, `image`, and `url`. The shelf is intentionally empty until real entries are added. An authenticated admin panel is future work. The lab includes Flexbox, typography, contrast, JSON inspection, simulated HTTP responses, bubble sort, binary search, text chunking, and word-count cosine similarity. HTTP and text exercises run locally; they do not call a backend or AI model.
+Resources are defined in `lib/resources.js` with `id`, `name`, `description`, `image`, and `url`. The shelf is intentionally empty until real entries are added. An authenticated admin panel is future work. The lab includes Flexbox, typography, contrast, JSON inspection, simulated HTTP responses, bubble sort, binary search, selection sort, insertion sort, linear search, Euclid’s GCD, breadth-first search, text chunking, and word-count cosine similarity. HTTP and text exercises run locally; they do not call a backend or AI model.
 
 Founder details are in `lib/founders.js`. Both supplied portraits and portfolio links are active. Muhammad Abdullah’s photo is `public/muhammad-abdullah.jpeg`.
 

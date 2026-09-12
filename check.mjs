@@ -4,6 +4,33 @@ import assert from 'node:assert/strict';
 import { roadmaps, findRoadmap } from './lib/roadmaps.js';
 import { newsUrl, rankStories } from './lib/news.js';
 import { labDomains, inspectJson, simulateHttp, parseNumbers, bubbleFrames, binarySteps, chunkText, wordSimilarity } from './lib/lab-modules.js';
+import { sortFrames, linearFrames, gcdFrames, breadthFrames } from './lib/algorithm-frames.js';
+
+for (const algorithm of ['selection', 'insertion']) {
+  for (const values of [[8, 3, 6, 1], [3, -2, 3, 0], [1, 2, 3], [4, 3, 2, 1]]) {
+    const original = [...values], frames = sortFrames(values, algorithm);
+    assert.deepEqual(frames.at(-1).items, [...values].sort((a, b) => a - b));
+    assert.deepEqual(values, original);
+    assert.deepEqual(frames[0].items, original);
+    for (const frame of frames) assert.deepEqual([...frame.items].sort((a, b) => a - b), [...original].sort((a, b) => a - b));
+  }
+}
+assert.throws(() => sortFrames([2, 1], 'unknown'));
+assert.match(linearFrames([4, 4, 8], 4).at(-1).text, /index 0/);
+assert.match(linearFrames([4, 8], 7).at(-1).text, /Not found/);
+assert.equal(gcdFrames(48, 18).at(-1).items[0], 6);
+assert.equal(gcdFrames(17, 13).at(-1).items[0], 1);
+assert.equal(gcdFrames(0, 18).at(-1).items[0], 18);
+assert.equal(gcdFrames(18, 0).at(-1).items[0], 18);
+assert.throws(() => gcdFrames(0, 0));
+assert.throws(() => gcdFrames(-1, 8));
+assert.throws(() => gcdFrames(1.5, 8));
+assert.deepEqual(breadthFrames('A', 'F').at(-1).path, ['A', 'C', 'F']);
+assert.deepEqual(breadthFrames('A', 'A').at(-1).path, ['A']);
+assert.match(breadthFrames('A', 'G').at(-1).text, /No path/);
+assert.match(breadthFrames('G', 'A').at(-1).text, /No path/);
+assert.throws(() => breadthFrames('unknown', 'A'));
+for (const frame of breadthFrames('A', 'G')) assert.equal(new Set(frame.visited).size, frame.visited.length);
 
 const html = readFileSync('out/lab/frontend/index.html', 'utf8');
 const home = readFileSync('out/index.html', 'utf8');
@@ -73,7 +100,9 @@ savedProgress = '{broken'; renderProgress(); effects.forEach(effect => effect())
 assert.match(renderProgress().storageMessage, /could not be loaded/);
 storageBlocked = true; renderProgress().toggleComplete();
 assert.match(renderProgress().storageMessage, /this visit only/);
-assert.equal(labDomains.reduce((total,domain)=>total+domain.modules.length,0),9);
+assert.equal(labDomains.reduce((total,domain)=>total+domain.modules.length,0),14);
+const algorithmsPage = readFileSync('out/lab/algorithms/index.html', 'utf8');
+for (let module = 1; module <= 7; module++) assert(algorithmsPage.includes(`id="module-0${module}"`));
 assert.equal(inspectJson('[1,2]').count,2);
 assert.equal(inspectJson('null').type,'null');
 assert.throws(()=>inspectJson('{bad}'));

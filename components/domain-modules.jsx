@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import AlgorithmExtras from './algorithm-extras';
 import { inspectJson, simulateHttp, parseNumbers, bubbleFrames, binarySteps, chunkText, wordSimilarity } from '../lib/lab-modules';
 
-function Module({ number, title, intro, children }) { return <section className="interactive-module"><div className="module-heading"><p className="eyebrow">MODULE {number}</p><h2>{title}</h2><p>{intro}</p></div>{children}</section>; }
+function Module({ number, title, intro, children }) { return <section className="interactive-module" id={`module-${number}`}><div className="module-heading"><p className="eyebrow">MODULE {number}</p><h2>{title}</h2><p>{intro}</p></div>{children}</section>; }
 function JsonInspector() {
   const [input,setInput] = useState('{"name":"PindariCoders","topics":["coding","AI"],"open":true}');
   let result, error;
@@ -37,4 +38,4 @@ function Similarity() {
   const result=wordSimilarity(first,second);
   return <Module number="02" title="how much do these words overlap?" intro="Turn word counts into vectors and compare their direction with cosine similarity. This measures shared vocabulary, not meaning or AI embeddings."><div className="module-columns"><label>Text A<textarea value={first} maxLength={1000} onChange={event=>setFirst(event.target.value)} /></label><label>Text B<textarea value={second} maxLength={1000} onChange={event=>setSecond(event.target.value)} /></label></div><div className="similarity-result" aria-live="polite"><strong>{result.empty?'—':result.score.toFixed(3)}</strong><span>{result.empty?'Enter at least one word in each text.':'cosine similarity · 0 = no shared words, 1 = aligned word counts'}</span></div><div className="table-scroll"><table><caption>Word-count vectors (case-insensitive; punctuation removed)</caption><thead><tr><th>Word</th><th>Text A</th><th>Text B</th></tr></thead><tbody>{result.rows.map(row=><tr key={row.word}><td>{row.word}</td><td>{row.a}</td><td>{row.b}</td></tr>)}</tbody></table></div><p className="module-hint">Try “happy” and “joyful.” Related meanings can score zero here because the words differ. That’s a limitation of word counts.</p></Module>;
 }
-export default function DomainModules({domain}) { return <div className="domain-modules">{domain==='backend'?<><JsonInspector/><HttpSandbox/></>:domain==='algorithms'?<><BubbleSort/><BinarySearch/></>:<><TextChunker/><Similarity/></>}</div>; }
+export default function DomainModules({domain}) { return <div className="domain-modules">{domain==='backend'?<><JsonInspector/><HttpSandbox/></>:domain==='algorithms'?<><nav className="algorithm-jumps" aria-label="Algorithm modules">{['Bubble sort', 'Binary search', 'Selection sort', 'Insertion sort', 'Linear search', 'Euclid’s GCD', 'Breadth-first search'].map((name, index) => <a key={name} href={`#module-0${index + 1}`}>{name} ↘</a>)}</nav><BubbleSort/><BinarySearch/><AlgorithmExtras/></>:<><TextChunker/><Similarity/></>}</div>; }
