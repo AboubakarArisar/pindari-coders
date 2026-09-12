@@ -1,0 +1,11 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { roadmaps, findRoadmap } from '../../../lib/roadmaps';
+export const dynamicParams = false;
+export function generateStaticParams() { return roadmaps.map(({ slug }) => ({ slug })); }
+export async function generateMetadata({ params }) { const domain = findRoadmap((await params).slug); return { title: domain ? `Learn ${domain.label}` : 'Domain not found' }; }
+export default async function DomainPage({ params }) {
+  const domain = findRoadmap((await params).slug);
+  if (!domain) notFound();
+  return <main className="wrap section"><Link className="back-link" href="/learn/">← all learning domains</Link><div className="domain-heading"><div className="page-heading"><p className="eyebrow">LEARN / {domain.category.toUpperCase()}</p><h1>{domain.title}<span className="roadmap-heading-dot">.</span></h1><p>{domain.summary}</p></div><Link className="button primary" href={`/roadmaps/${domain.slug}/`}>open the full roadmap ↗</Link></div><p className="prerequisite"><strong>Before you start</strong><span>{domain.prerequisite}</span></p><section className="domain-curriculum"><h2>the things that make it click.</h2>{domain.steps.map((step,index) => <details className="lesson" key={step.title} open={index === 0}><summary><span className="note-number">0{index+1}</span><span>{step.title}</span><span className="lesson-plus" aria-hidden="true">+</span></summary><div className="lesson-body"><p>{step.description}</p><div className="topic-chips">{step.topics.map(topic => <span key={topic}>{topic}</span>)}</div><p><strong>Try this:</strong> {step.task}</p><div className="lesson-resources">{step.resources.map(resource => resource.url.startsWith('/') ? <Link href={resource.url} key={resource.url}>{resource.title} ↗</Link> : <a href={resource.url} key={resource.url} target="_blank" rel="noopener noreferrer">{resource.title} ↗</a>)}</div></div></details>)}</section><div className="domain-finish"><p className="eyebrow">YOUR FINISH LINE</p><h2>{domain.outcome}</h2><p>Move at your own pace and revisit the basics whenever you need to.</p><Link className="text-link" href={`/roadmaps/${domain.slug}/`}>follow the path ↗</Link></div></main>;
+}

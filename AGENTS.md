@@ -10,4 +10,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project identity
 
-The creator's name is **Abou Bakar Arisar**. Use this exact spelling in site content and metadata.
+The co-founders are **Abou Bakar Arisar** and **Abdullah Arain**. Use these exact spellings. They started PindariCoders to help others learn coding and share tech news, first on Facebook and YouTube. Abdullah's photo currently uses Abou Bakar's portrait as an explicitly requested temporary placeholder. Replace `public/abdullah-arain.png` when his photo is supplied.

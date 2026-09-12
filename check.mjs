@@ -2,8 +2,19 @@ import { readFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { roadmaps, findRoadmap } from './lib/roadmaps.js';
+import { newsUrl, rankStories } from './lib/news.js';
 
-const html = readFileSync('out/index.html', 'utf8');
+const html = readFileSync('out/lab/index.html', 'utf8');
+const home = readFileSync('out/index.html', 'utf8');
+const paths = ['/', '/learn/', '/lab/', '/notes/', '/story/', '/trending/', '/roadmaps/', ...roadmaps.flatMap(item => [`/learn/${item.slug}/`, `/roadmaps/${item.slug}/`])];
+for (const route of paths) {
+  const page = readFileSync(`out${route}index.html`, 'utf8');
+  for (const match of page.matchAll(/(?:src|href)="(\/[^"#?]*)/g)) assert(existsSync(`out${match[1]}`), `Missing local destination in ${route}: ${match[1]}`);
+}
+assert(!home.includes('id="flex-items"'), 'Playground must live on its own page');
+const story = readFileSync('out/story/index.html', 'utf8');
+assert(story.includes('Abou Bakar Arisar') && story.includes('Abdullah Arain'));
+assert(story.includes('temporary photo'));
 const elements = new Map();
 for (const match of html.matchAll(/id="([^"]+)"/g)) {
   assert(!elements.has(match[1]), `Duplicate ID: ${match[1]}`);
@@ -29,6 +40,13 @@ for (const roadmap of roadmaps) {
   }
 }
 assert.equal(findRoadmap('missing-path'), undefined);
+const now = Date.UTC(2026, 8, 12);
+const item = { objectID: '1', title: 'AI release', created_at_i: now / 1000 - 3600, points: 10, num_comments: 3, url: 'https://example.com/article' };
+const ranked = rankStories([{ hits: [item, item, { ...item, objectID: '2', points: 100, url: 'javascript:alert(1)' }, { ...item, objectID: '3', created_at_i: now / 1000 - 9 * 86400 }, { ...item, objectID: '4', created_at_i: now / 1000 + 1 }, null] }], now);
+assert.deepEqual(ranked.map(story => story.id), ['2', '1']);
+assert.equal(ranked[0].url, 'https://news.ycombinator.com/item?id=2');
+assert.deepEqual(rankStories([{}, { hits: [] }], now), []);
+assert.equal(new URL(newsUrl('AI', now)).searchParams.get('numericFilters'), `created_at_i>${now / 1000 - 7 * 86400}`);
 const get = id => elements.get(id);
 for (const [id, value] of Object.entries({ gap: '12', justify: 'center', 'type-size': '48', 'type-tracking': '-2', 'type-font': 'sans', 'type-text': 'hello', foreground: '#243427', background: '#d9fa76' })) get(id).value = value;
 get('justify').options = ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'].map(value => ({ value }));
