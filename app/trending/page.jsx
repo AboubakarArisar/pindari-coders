@@ -1,3 +1,3 @@
 import TrendingFeed from '../../components/trending-feed';
-export const metadata = { title: 'Trending in AI', description: 'Live AI stories from Hacker News, ranked by points from the past seven days.' };
-export default function TrendingPage() { return <main className="wrap section"><div className="page-heading"><p className="eyebrow">THE TECH CORNER / AI EDITION</p><h1>what’s making<br /><span className="serif-word">some noise.</span></h1><p>AI news, new tools, and interesting ideas from the conversations happening right now.</p></div><TrendingFeed /></main>; }
+export const metadata = { title: 'Trending in tech', description: 'AI, technology, job market and developer stories from Hacker News and DEV Community in the last three days. Filter, sort and explore.' };
+export default function TrendingPage() { return <main className="wrap section"><div className="page-heading"><p className="eyebrow">THE TECH CORNER / LAST 3 DAYS</p><h1>what’s making<br /><span className="serif-word">some noise.</span></h1><p>AI developments, tech conversations, career shifts and useful developer discoveries. Choose your corner of the feed.</p></div><TrendingFeed /></main>; }
