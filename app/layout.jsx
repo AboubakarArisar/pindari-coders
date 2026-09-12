@@ -15,5 +15,5 @@ export default function RootLayout({ children }) {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  </head><body><a className="skip-link" href="#main-content">Skip to content</a><SiteHeader /><div id="main-content">{children}</div><SiteFooter /></body></html>;
+  </head><body><div className="site-preloader" aria-hidden="true"><div><img src="/icon.svg" alt="" width="72" height="72" /><p>pindaricoders<span>.</span></p><small>making room for curious minds</small></div></div><a className="skip-link" href="#main-content">Skip to content</a><SiteHeader /><div id="main-content">{children}</div><SiteFooter /></body></html>;
 }

@@ -34,7 +34,8 @@ export default function ResourceShelf() {
     setPage(1);
   }
   return <section aria-label="Resource collection" aria-busy={feed.state === 'loading'}>
-    <div role="status">{feed.state === 'loading' && <p className="feed-status">Loading the latest finds…</p>}{feed.state === 'error' && <p className="feed-status">The resource shelf couldn’t be refreshed. {feed.items.length > 0 && 'Previous results are shown below.'} <button className="text-button" onClick={() => setRefresh(value => value + 1)}>try again ↻</button></p>}</div>
+    <div role="status">{feed.state === 'loading' && <p className={feed.items.length ? 'feed-status' : 'sr-only'}>Loading resources…</p>}{feed.state === 'error' && <p className="feed-status">The resource shelf couldn’t be refreshed. {feed.items.length > 0 && 'Previous results are shown below.'} <button className="text-button" onClick={() => setRefresh(value => value + 1)}>try again ↻</button></p>}</div>
+    {feed.state === 'loading' && !feed.items.length && <div className="resource-grid resource-skeleton-grid" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <article className="resource-skeleton" key={index}><div className="skeleton-logo"><span /></div><div><i /><b /><i /><i /></div></article>)}</div>}
     {feed.items.length > 0 && <>
       <div className="resource-filters">
         <label>Domain<select value={filters.category} onChange={event => filter('category', event.target.value)}>{categories.map(category => <option key={category}>{category}</option>)}</select></label>
