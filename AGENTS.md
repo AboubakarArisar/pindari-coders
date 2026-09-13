@@ -11,3 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Project identity
 
 Use the public names **Abou Bakar** and **Muhammad Abdullah**, with no role labels beside their names. They started PindariCoders to help others learn coding and share tech news, first on Facebook and YouTube. Muhammad Abdullah's supplied portrait is in `public/muhammad-abdullah.jpeg` and his portfolio is https://muhammad-abdullah.dev/. Resources are managed in the authenticated Sanity Studio in `studio/` (project `uffqpes0`, dataset `production`). The website reads published resources without a token. Never expose an editing token or an unauthenticated editor.
+
+## Local server policy
+
+Never start a development, preview, or other server as a background process. If a server is needed, run it in the foreground and stop it before finishing. Never use port 3000; this project uses port 4173.
