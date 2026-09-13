@@ -6,6 +6,7 @@ import { newsUrl, newsRequests, normalizeNews, mergeNews, newsPage, NEWS_WINDOW 
 import { labDomains, inspectJson, simulateHttp, parseNumbers, bubbleFrames, binarySteps, chunkText, wordSimilarity } from './lib/lab-modules.js';
 import { sortFrames, linearFrames, gcdFrames, breadthFrames } from './lib/algorithm-frames.js';
 import { normalizeResources, resourcePage, RESOURCE_ENDPOINT } from './lib/resources.js';
+import { normalizeOpportunities, opportunityPage, deadlineLabel, OPPORTUNITY_ENDPOINT } from './lib/opportunities.js';
 const validResource = { id: 'resource-1', name: 'A tool', description: 'Useful for learning', url: 'https://example.com/', image: 'https://cdn.sanity.io/images/uffqpes0/production/example-640x360.png', alt: 'Tool preview', category: 'Frontend', pricing: 'Free' };
 assert.equal(normalizeResources({ result: [validResource, validResource] }).length, 1);
 assert.equal(normalizeResources({ result: [{ ...validResource, id: 'drafts.resource-1' }] }).length, 0);
@@ -14,11 +15,19 @@ assert.equal(normalizeResources({ result: [{ ...validResource, image: 'https://e
 assert.equal(normalizeResources({ result: [null, {}] }).length, 0);
 assert.throws(() => normalizeResources({ error: 'Unavailable' }));
 assert.equal(new URL(RESOURCE_ENDPOINT).searchParams.get('perspective'), 'published');
+const validOpportunity = { id: 'opportunity-1', title: 'Junior React developer', company: 'Example', description: 'Build accessible web products.', url: 'https://example.com/jobs/1', location: 'Worldwide', type: 'Job', experience: 'Junior', domain: 'Frontend', source: 'Himalayas', skills: ['React'], publishedAt: '2026-09-13T00:00:00.000Z', expiresAt: '2026-10-13T00:00:00.000Z' };
+assert.equal(normalizeOpportunities({ result: [validOpportunity, validOpportunity] }).length, 1);
+assert.equal(normalizeOpportunities({ result: [{ ...validOpportunity, id: 'drafts.opportunity-1' }] }).length, 0);
+assert.equal(normalizeOpportunities({ result: [{ ...validOpportunity, url: 'javascript:alert(1)' }] }).length, 0);
+assert.equal(opportunityPage([validOpportunity], { query: 'react', location: 'Worldwide' }).total, 1);
+assert.equal(opportunityPage([validOpportunity], { domain: 'Backend' }).total, 0);
+assert.equal(deadlineLabel(Date.UTC(2026, 8, 14), Date.UTC(2026, 8, 13)), '1 day left');
+assert.equal(new URL(OPPORTUNITY_ENDPOINT).searchParams.get('perspective'), 'published');
 const resourceItems = Array.from({ length: 20 }, (_, index) => ({ ...validResource, id: `resource-${index}`, category: index < 12 ? 'AI' : 'Backend', pricing: index % 2 ? 'Free' : 'Paid' }));
 assert.equal(resourcePage(resourceItems, { category: 'AI' }).total, 12);
 assert.equal(resourcePage(resourceItems, { category: 'AI', pricing: 'Free' }).total, 6);
-assert.equal(resourcePage(resourceItems, { page: 99 }).current, 3);
-assert.equal(resourcePage(resourceItems, { page: 2 }).items.length, 9);
+assert.equal(resourcePage(resourceItems, { page: 99 }).current, 2);
+assert.equal(resourcePage(resourceItems, { page: 2 }).items.length, 8);
 
 for (const algorithm of ['selection', 'insertion']) {
   for (const values of [[8, 3, 6, 1], [3, -2, 3, 0], [1, 2, 3], [4, 3, 2, 1]]) {
@@ -48,7 +57,7 @@ for (const frame of breadthFrames('A', 'G')) assert.equal(new Set(frame.visited)
 
 const html = readFileSync('out/lab/frontend/index.html', 'utf8');
 const home = readFileSync('out/index.html', 'utf8');
-const paths = ['/', '/learn/', '/lab/', '/resources/', '/story/', '/trending/', '/roadmaps/', ...labDomains.map(item=>`/lab/${item.slug}/`), ...roadmaps.flatMap(item => [`/learn/${item.slug}/`, `/roadmaps/${item.slug}/`])];
+const paths = ['/', '/learn/', '/lab/', '/resources/', '/opportunities/', '/story/', '/trending/', '/roadmaps/', ...labDomains.map(item=>`/lab/${item.slug}/`), ...roadmaps.flatMap(item => [`/learn/${item.slug}/`, `/roadmaps/${item.slug}/`])];
 for (const route of paths) {
   const page = readFileSync(`out${route}index.html`, 'utf8');
   for (const match of page.matchAll(/(?:src|href)="(\/[^"#?]*)/g)) assert(existsSync(`out${match[1]}`), `Missing local destination in ${route}: ${match[1]}`);
