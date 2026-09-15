@@ -55,6 +55,27 @@ assert.match(breadthFrames('G', 'A').at(-1).text, /No path/);
 assert.throws(() => breadthFrames('unknown', 'A'));
 for (const frame of breadthFrames('A', 'G')) assert.equal(new Set(frame.visited).size, frame.visited.length);
 
+const serverBuild = !readFileSync('next.config.mjs', 'utf8').includes("output: 'export'");
+if (serverBuild) {
+  for (const file of [
+    '.next/server/app/wall.html',
+    '.next/server/app/control-room.html',
+    '.next/server/app/api/wall/projects/route.js',
+    '.next/server/app/api/wall/submit/route.js',
+    '.next/server/app/api/control-room/login/route.js',
+    '.next/server/app/api/control-room/projects/route.js',
+  ]) assert(existsSync(file), `Missing server build artifact: ${file}`);
+  const wall = readFileSync('components/wall-gallery.jsx', 'utf8');
+  const controlRoom = readFileSync('components/control-room.jsx', 'utf8');
+  const migration = readFileSync('supabase/migrations/20260915_create_community_wall.sql', 'utf8');
+  assert(wall.includes('1–3 JPG, PNG or WebP files, 3 MB each'));
+  assert(controlRoom.includes('/api/control-room/login'));
+  assert(migration.includes('alter table public.community_projects enable row level security'));
+  assert(readFileSync('components/site-header.jsx', 'utf8').includes('href="/wall/"'));
+  console.log('Passed: content logic, lab algorithms, Wall routes, moderation UI, Supabase migration, and server build artifacts.');
+  process.exit(0);
+}
+
 const html = readFileSync('out/lab/frontend/index.html', 'utf8');
 const home = readFileSync('out/index.html', 'utf8');
 const paths = ['/', '/learn/', '/lab/', '/resources/', '/opportunities/', '/story/', '/trending/', '/roadmaps/', ...labDomains.map(item=>`/lab/${item.slug}/`), ...roadmaps.flatMap(item => [`/learn/${item.slug}/`, `/roadmaps/${item.slug}/`])];
