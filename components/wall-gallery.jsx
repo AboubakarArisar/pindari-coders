@@ -5,6 +5,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 const categories = ['All', 'Web', 'Mobile', 'AI', 'Backend', 'Data', 'DevTools', 'Other'];
 const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const maximumImageSize = 3 * 1024 * 1024;
+const reactionOptions = [
+  { type: 'love', emoji: '❤️', label: 'Love' },
+  { type: 'cool', emoji: '🔥', label: 'Cool' },
+  { type: 'smart', emoji: '💡', label: 'Smart' },
+  { type: 'would_use', emoji: '🙋', label: 'I’d use this' },
+];
 
 function validHttpsUrl(value) {
   if (!value) return null;
@@ -191,7 +197,32 @@ function ProjectCard({ project }) {
   const destination = project.live_url || project.repository_url;
   const images = Array.isArray(project.images) ? project.images : [];
   const [imageIndex, setImageIndex] = useState(0);
+  const [reactionCounts, setReactionCounts] = useState(project.reactions || { love: 0, cool: 0, smart: 0, would_use: 0 });
+  const [selectedReaction, setSelectedReaction] = useState(project.selected_reaction || null);
+  const [reactionBusy, setReactionBusy] = useState(false);
+  const [reactionError, setReactionError] = useState('');
   const selectImage = (index) => setImageIndex((index + images.length) % images.length);
+
+  const react = async (reaction) => {
+    if (reactionBusy) return;
+    setReactionBusy(true);
+    setReactionError('');
+    try {
+      const response = await fetch(`/api/wall/projects/${project.id}/reaction`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ reaction }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Your reaction could not be saved.');
+      setReactionCounts(data.counts);
+      setSelectedReaction(data.selected);
+    } catch (error) {
+      setReactionError(error.message || 'Your reaction could not be saved.');
+    } finally {
+      setReactionBusy(false);
+    }
+  };
 
   return <article className={`wall-card${project.featured ? ' is-featured' : ''}`}>
     <div className="wall-card-image">
@@ -199,6 +230,6 @@ function ProjectCard({ project }) {
       <span>{project.featured ? '✳ featured' : project.category}</span>
       {images.length > 1 && <><button className="wall-carousel-button previous" type="button" onClick={() => selectImage(imageIndex - 1)} aria-label={`Show previous screenshot of ${project.title}`}>←</button><button className="wall-carousel-button next" type="button" onClick={() => selectImage(imageIndex + 1)} aria-label={`Show next screenshot of ${project.title}`}>→</button><div className="wall-carousel-dots" aria-label={`${project.title} screenshots`}>{images.map((image, index) => <button className={index === imageIndex ? 'active' : ''} type="button" onClick={() => selectImage(index)} aria-label={`Show screenshot ${index + 1} of ${project.title}`} aria-current={index === imageIndex ? 'true' : undefined} key={image} />)}</div></>}
     </div>
-    <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div><div className="wall-card-links">{project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer">view live ↗</a>}{project.repository_url && <a href={project.repository_url} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div></div>
+    <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div><div className="wall-reactions" aria-label={`React to ${project.title}`}>{reactionOptions.map(({ type, emoji, label }) => <button className={selectedReaction === type ? 'active' : ''} type="button" aria-pressed={selectedReaction === type} aria-label={`${label}: ${reactionCounts[type] || 0}`} disabled={reactionBusy} onClick={() => react(type)} key={type}><span aria-hidden="true">{emoji}</span><span>{label}</span><strong>{reactionCounts[type] || 0}</strong></button>)}</div>{reactionError && <p className="wall-reaction-error" role="alert">{reactionError}</p>}<div className="wall-card-links">{project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer">view live ↗</a>}{project.repository_url && <a href={project.repository_url} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div></div>
   </article>;
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { publicImageUrl, supabaseRequest } from '../../../../lib/supabase-admin';
+import { requestFingerprint } from '../../../../lib/request-security';
 
 export const runtime = 'nodejs';
 
@@ -31,11 +32,30 @@ export async function GET(request) {
     });
     const projects = await response.json();
     const total = Number.parseInt(response.headers.get('content-range')?.split('/')[1] || '0', 10) || 0;
+    const projectIds = projects.map((project) => project.id);
+    let counts = [];
+    let selections = [];
+    if (projectIds.length) {
+      const ids = projectIds.join(',');
+      [counts, selections] = await Promise.all([
+        supabaseRequest(`/rest/v1/community_project_reaction_counts?select=project_id,love_count,cool_count,smart_count,would_use_count&project_id=in.(${ids})`),
+        supabaseRequest(`/rest/v1/community_project_reactions?select=project_id,reaction&project_id=in.(${ids})&fingerprint=eq.${requestFingerprint(request)}`),
+      ]);
+    }
+    const countByProject = new Map(counts.map((row) => [row.project_id, {
+      love: Number(row.love_count) || 0,
+      cool: Number(row.cool_count) || 0,
+      smart: Number(row.smart_count) || 0,
+      would_use: Number(row.would_use_count) || 0,
+    }]));
+    const selectionByProject = new Map(selections.map((row) => [row.project_id, row.reaction]));
     const items = projects.map((project) => ({
       ...project,
       images: [...(project.community_project_images || [])]
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((image) => publicImageUrl(image.storage_path)),
+      reactions: countByProject.get(project.id) || { love: 0, cool: 0, smart: 0, would_use: 0 },
+      selected_reaction: selectionByProject.get(project.id) || null,
       community_project_images: undefined,
     }));
 

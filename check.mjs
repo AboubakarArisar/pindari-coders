@@ -61,6 +61,7 @@ if (serverBuild) {
     '.next/server/app/wall.html',
     '.next/server/app/control-room.html',
     '.next/server/app/api/wall/projects/route.js',
+    '.next/server/app/api/wall/projects/[id]/reaction/route.js',
     '.next/server/app/api/wall/submit/route.js',
     '.next/server/app/api/control-room/login/route.js',
     '.next/server/app/api/control-room/projects/route.js',
@@ -68,14 +69,18 @@ if (serverBuild) {
   const wall = readFileSync('components/wall-gallery.jsx', 'utf8');
   const controlRoom = readFileSync('components/control-room.jsx', 'utf8');
   const migration = readFileSync('supabase/migrations/20260915_create_community_wall.sql', 'utf8');
+  const reactionsMigration = readFileSync('supabase/migrations/20260917_add_project_reactions.sql', 'utf8');
   assert(wall.includes('exactly 3 JPG, PNG or WebP files, 3 MB each'));
   assert(wall.includes('wall-image-preview') && wall.includes('removeImage'));
   assert(wall.includes('wall-carousel-button') && wall.includes('GitHub ↗'));
+  assert(wall.includes('❤️') && wall.includes('🙋') && wall.includes('wall-reactions'));
   assert(wall.includes('const form = event.currentTarget;'));
   assert(controlRoom.includes('/api/control-room/login'));
   assert(controlRoom.includes('const form = event.currentTarget;'));
   assert(controlRoom.includes("window.location.replace('/')"));
   assert(migration.includes('alter table public.community_projects enable row level security'));
+  assert(reactionsMigration.includes('primary key (project_id, fingerprint)'));
+  assert(reactionsMigration.includes('set_community_project_reaction'));
   assert(readFileSync('components/site-header.jsx', 'utf8').includes('href="/wall/"'));
   console.log('Passed: content logic, lab algorithms, Wall routes, moderation UI, Supabase migration, and server build artifacts.');
   process.exit(0);
