@@ -74,6 +74,7 @@ if (serverBuild) {
   assert(wall.includes('const form = event.currentTarget;'));
   assert(controlRoom.includes('/api/control-room/login'));
   assert(controlRoom.includes('const form = event.currentTarget;'));
+  assert(controlRoom.includes("window.location.replace('/')"));
   assert(migration.includes('alter table public.community_projects enable row level security'));
   assert(readFileSync('components/site-header.jsx', 'utf8').includes('href="/wall/"'));
   console.log('Passed: content logic, lab algorithms, Wall routes, moderation UI, Supabase migration, and server build artifacts.');

@@ -74,13 +74,26 @@ export default function ControlRoom() {
     } catch (error) { setMessage(error.message); } finally { setBusy(''); }
   };
 
-  const logout = async () => { await fetch('/api/control-room/logout', { method: 'POST' }); setProjects([]); setAuthenticated(false); };
+  const logout = async () => {
+    setBusy('logout');
+    setMessage('');
+    try {
+      const response = await fetch('/api/control-room/logout', { method: 'POST' });
+      if (!response.ok) throw new Error('The control room could not be locked.');
+      setProjects([]);
+      setAuthenticated(false);
+      window.location.replace('/');
+    } catch (error) {
+      setMessage(error.message || 'The control room could not be locked.');
+      setBusy('');
+    }
+  };
 
   if (authenticated === null) return <div className="control-loading"><span>✳</span><p>opening the control room…</p></div>;
   if (!authenticated) return <section className="control-login"><p className="eyebrow">OWNERS ONLY</p><h1>the control<br /><span className="serif-word">room.</span></h1><p>One shared key for Abou Bakar and Muhammad Abdullah.</p><form onSubmit={login}><label htmlFor="control-password">Control-room key</label><input id="control-password" name="password" type="password" autoComplete="current-password" required /><button className="button primary" disabled={busy === 'login'}>{busy === 'login' ? 'checking…' : 'enter ↗'}</button></form>{message && <p className="control-message" role="alert">{message}</p>}</section>;
 
   return <>
-    <header className="control-head"><div><p className="eyebrow">THE WALL / MODERATION</p><h1>control room.</h1></div><button className="text-button" onClick={logout}>lock the room ↗</button></header>
+    <header className="control-head"><div><p className="eyebrow">THE WALL / MODERATION</p><h1>control room.</h1></div><button className="text-button" disabled={busy === 'logout'} onClick={logout}>{busy === 'logout' ? 'locking…' : 'lock the room ↗'}</button></header>
     <nav className="control-tabs" aria-label="Submission status">{statuses.map((status) => <button className={filter === status ? 'active' : ''} onClick={() => setFilter(status)} key={status}>{status} <span>{counts[status]}</span></button>)}</nav>
     {message && <p className="control-message" role="status">{message}</p>}
     <div className="control-list">{visible.length ? visible.map((project) => <article className="control-card" key={project.id}>
