@@ -11,7 +11,17 @@ const types = new Map([['image/jpeg', 'jpg'], ['image/png', 'png'], ['image/webp
 const text = (form, name, max) => String(form.get(name) || '').trim().slice(0, max);
 const validUrl = (value) => {
   if (!value) return null;
-  try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; } catch { return null; }
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password && url.hostname.includes('.') ? url : null;
+  } catch {
+    return null;
+  }
+};
+const validRepositoryUrl = (value) => {
+  const url = validUrl(value);
+  if (!url || !['github.com', 'www.github.com'].includes(url.hostname.toLowerCase())) return null;
+  return url.pathname.split('/').filter(Boolean).length >= 2 ? url : null;
 };
 const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'project';
 
@@ -44,17 +54,21 @@ export async function POST(request) {
     const stack = text(form, 'stack', 160).split(',').map((item) => item.trim()).filter(Boolean).slice(0, 8);
     const liveUrlInput = text(form, 'liveUrl', 300);
     const repositoryUrlInput = text(form, 'repositoryUrl', 300);
-    const liveUrl = validUrl(liveUrlInput);
-    const repositoryUrl = validUrl(repositoryUrlInput);
+    const liveUrl = validUrl(liveUrlInput)?.href || null;
+    const repositoryUrl = validRepositoryUrl(repositoryUrlInput)?.href || null;
     const images = form.getAll('images').filter((item) => item instanceof File && item.size > 0);
 
     if (title.length < 2 || builderName.length < 2 || !/^\S+@\S+\.\S+$/.test(builderEmail) || description.length < 20 || !categories.has(category)) {
       return NextResponse.json({ error: 'Please complete every required field.' }, { status: 400 });
     }
-    if ((liveUrlInput && !liveUrl) || (repositoryUrlInput && !repositoryUrl) || (!liveUrl && !repositoryUrl)) {
-      return NextResponse.json({ error: 'Add at least one valid HTTPS project or repository link.' }, { status: 400 });
+    if (liveUrlInput && !liveUrl) {
+      return NextResponse.json({ error: 'The live URL must be a complete public HTTPS link.' }, { status: 400 });
     }
-    if (images.length < 1 || images.length > 3) return NextResponse.json({ error: 'Add between one and three project images.' }, { status: 400 });
+    if (repositoryUrlInput && !repositoryUrl) {
+      return NextResponse.json({ error: 'The GitHub URL must link to a repository on github.com.' }, { status: 400 });
+    }
+    if (!liveUrl && !repositoryUrl) return NextResponse.json({ error: 'Add at least one valid project link.' }, { status: 400 });
+    if (images.length !== 3) return NextResponse.json({ error: 'Add exactly three project images.' }, { status: 400 });
     for (const image of images) {
       if (!types.has(image.type) || image.size > 3 * 1024 * 1024 || !(await isImage(image))) {
         return NextResponse.json({ error: 'Images must be genuine JPG, PNG or WebP files under 3 MB.' }, { status: 400 });
@@ -77,7 +91,7 @@ export async function POST(request) {
     }
 
     await supabaseRequest('/rest/v1/wall_activity', { method: 'POST', headers: { prefer: 'return=minimal' }, json: { fingerprint, action: 'submit', successful: true } });
-    return NextResponse.json({ ok: true, message: 'Your project is waiting for review.' }, { status: 201 });
+    return NextResponse.json({ ok: true, message: 'Thanks — your project was sent and is waiting for admin review.' }, { status: 201 });
   } catch (error) {
     console.error('Wall submission failed:', error);
     try {

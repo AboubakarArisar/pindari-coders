@@ -34,7 +34,7 @@ The production build requires a Next.js server-capable host because The Wall use
 2. Copy `.env.example` to `.env.local` and provide `SUPABASE_URL`, the server-only `SUPABASE_SERVICE_ROLE_KEY`, a new shared `CONTROL_ROOM_PASSWORD`, and a random `CONTROL_ROOM_SESSION_SECRET` of at least 32 characters.
 3. Add the same four variables to the deployment environment. Never prefix the service key or control-room secrets with `NEXT_PUBLIC_`.
 
-Public submissions accept one to three JPG, PNG, or WebP images of up to 3 MB each. New projects remain pending until approved at `/control-room`. The control-room route uses one shared password, rate-limited login attempts, an HTTP-only signed session cookie, and server-only Supabase access.
+Public submissions require three JPG, PNG, or WebP images of up to 3 MB each. New projects remain pending until approved at `/control-room`. The control-room route uses one shared password, rate-limited login attempts, an HTTP-only signed session cookie, and server-only Supabase access.
 
 Roadmap content lives in `lib/roadmaps.js`; home content in `components/home.jsx`; frontend playgrounds in `components/lab.jsx`; other modules in `components/domain-modules.jsx` and `lib/lab-modules.js`; shared design in `app/globals.css`. The paths are original starting guides inspired by roadmap.sh, with links to primary learning resources and attribution. They are not a copy of roadmap.sh’s full curriculum.
 

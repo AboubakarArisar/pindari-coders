@@ -33,14 +33,15 @@ export default function ControlRoom() {
 
   const login = async (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     setBusy('login');
     setMessage('');
-    const password = new FormData(event.currentTarget).get('password');
+    const password = new FormData(form).get('password');
     try {
       const response = await fetch('/api/control-room/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      event.currentTarget.reset();
+      form.reset();
       await load();
     } catch (error) { setMessage(error.message); } finally { setBusy(''); }
   };
