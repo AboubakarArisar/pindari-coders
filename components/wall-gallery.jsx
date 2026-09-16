@@ -194,14 +194,26 @@ export default function WallGallery() {
 }
 
 function ProjectCard({ project }) {
-  const destination = project.live_url || project.repository_url;
   const images = Array.isArray(project.images) ? project.images : [];
   const [imageIndex, setImageIndex] = useState(0);
+  const selectImage = (index) => setImageIndex((index + images.length) % images.length);
+
+  return <article className={`wall-card${project.featured ? ' is-featured' : ''}`}>
+    <a className="wall-card-open" href={`/builds/${encodeURIComponent(project.slug)}/`} aria-label={`View ${project.title}`} />
+    <div className="wall-card-image">
+      {images[imageIndex] ? <img src={images[imageIndex]} alt={`Screenshot ${imageIndex + 1} of ${project.title}`} /> : null}
+      <span>{project.featured ? '✳ featured' : project.category}</span>
+      {images.length > 1 && <><button className="wall-carousel-button previous" type="button" onClick={() => selectImage(imageIndex - 1)} aria-label={`Show previous screenshot of ${project.title}`}>←</button><button className="wall-carousel-button next" type="button" onClick={() => selectImage(imageIndex + 1)} aria-label={`Show next screenshot of ${project.title}`}>→</button><div className="wall-carousel-dots" aria-label={`${project.title} screenshots`}>{images.map((image, index) => <button className={index === imageIndex ? 'active' : ''} type="button" onClick={() => selectImage(index)} aria-label={`Show screenshot ${index + 1} of ${project.title}`} aria-current={index === imageIndex ? 'true' : undefined} key={image} />)}</div></>}
+    </div>
+    <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div><ProjectReactions project={project} /><div className="wall-card-links">{project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer">view live ↗</a>}{project.repository_url && <a href={project.repository_url} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div></div>
+  </article>;
+}
+
+export function ProjectReactions({ project }) {
   const [reactionCounts, setReactionCounts] = useState(project.reactions || { love: 0, cool: 0, smart: 0, would_use: 0 });
   const [selectedReaction, setSelectedReaction] = useState(project.selected_reaction || null);
   const [reactionBusy, setReactionBusy] = useState(false);
   const [reactionError, setReactionError] = useState('');
-  const selectImage = (index) => setImageIndex((index + images.length) % images.length);
 
   const react = async (reaction) => {
     if (reactionBusy) return;
@@ -235,12 +247,5 @@ function ProjectCard({ project }) {
     }
   };
 
-  return <article className={`wall-card${project.featured ? ' is-featured' : ''}`}>
-    <div className="wall-card-image">
-      {destination && images[imageIndex] ? <a href={destination} target="_blank" rel="noopener noreferrer" aria-label={`Open ${project.title}`}><img src={images[imageIndex]} alt={`Screenshot ${imageIndex + 1} of ${project.title}`} /></a> : images[imageIndex] ? <img src={images[imageIndex]} alt={`Screenshot ${imageIndex + 1} of ${project.title}`} /> : null}
-      <span>{project.featured ? '✳ featured' : project.category}</span>
-      {images.length > 1 && <><button className="wall-carousel-button previous" type="button" onClick={() => selectImage(imageIndex - 1)} aria-label={`Show previous screenshot of ${project.title}`}>←</button><button className="wall-carousel-button next" type="button" onClick={() => selectImage(imageIndex + 1)} aria-label={`Show next screenshot of ${project.title}`}>→</button><div className="wall-carousel-dots" aria-label={`${project.title} screenshots`}>{images.map((image, index) => <button className={index === imageIndex ? 'active' : ''} type="button" onClick={() => selectImage(index)} aria-label={`Show screenshot ${index + 1} of ${project.title}`} aria-current={index === imageIndex ? 'true' : undefined} key={image} />)}</div></>}
-    </div>
-    <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div><div className="wall-reactions" aria-label={`React to ${project.title}`} aria-busy={reactionBusy}>{reactionOptions.map(({ type, emoji, label }) => <button className={selectedReaction === type ? 'active' : ''} type="button" aria-pressed={selectedReaction === type} aria-label={`${label}: ${reactionCounts[type] || 0}`} disabled={reactionBusy} onClick={() => react(type)} key={type}><span aria-hidden="true">{emoji}</span><strong>{reactionCounts[type] || 0}</strong></button>)}</div>{reactionError && <p className="wall-reaction-error" role="alert">{reactionError}</p>}<div className="wall-card-links">{project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer">view live ↗</a>}{project.repository_url && <a href={project.repository_url} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div></div>
-  </article>;
+  return <><div className="wall-reactions" aria-label={`React to ${project.title}`} aria-busy={reactionBusy}>{reactionOptions.map(({ type, emoji, label }) => <button className={selectedReaction === type ? 'active' : ''} type="button" aria-pressed={selectedReaction === type} aria-label={`${label}: ${reactionCounts[type] || 0}`} disabled={reactionBusy} onClick={() => react(type)} key={type}><span aria-hidden="true">{emoji}</span><strong>{reactionCounts[type] || 0}</strong></button>)}</div>{reactionError && <p className="wall-reaction-error" role="alert">{reactionError}</p>}</>;
 }
