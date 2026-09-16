@@ -70,6 +70,7 @@ if (serverBuild) {
   const migration = readFileSync('supabase/migrations/20260915_create_community_wall.sql', 'utf8');
   assert(wall.includes('exactly 3 JPG, PNG or WebP files, 3 MB each'));
   assert(wall.includes('wall-image-preview') && wall.includes('removeImage'));
+  assert(wall.includes('wall-carousel-button') && wall.includes('GitHub ↗'));
   assert(wall.includes('const form = event.currentTarget;'));
   assert(controlRoom.includes('/api/control-room/login'));
   assert(controlRoom.includes('const form = event.currentTarget;'));

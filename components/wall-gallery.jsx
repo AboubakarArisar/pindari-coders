@@ -189,10 +189,16 @@ export default function WallGallery() {
 
 function ProjectCard({ project }) {
   const destination = project.live_url || project.repository_url;
+  const images = Array.isArray(project.images) ? project.images : [];
+  const [imageIndex, setImageIndex] = useState(0);
+  const selectImage = (index) => setImageIndex((index + images.length) % images.length);
+
   return <article className={`wall-card${project.featured ? ' is-featured' : ''}`}>
-    <a href={destination} target="_blank" rel="noopener noreferrer">
-      <div className="wall-card-image">{project.images[0] ? <img src={project.images[0]} alt={`Screenshot of ${project.title}`} /> : null}<span>{project.featured ? '✳ featured' : project.category}</span></div>
-      <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p><span aria-hidden="true">↗</span></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div></div>
-    </a>
+    <div className="wall-card-image">
+      {destination && images[imageIndex] ? <a href={destination} target="_blank" rel="noopener noreferrer" aria-label={`Open ${project.title}`}><img src={images[imageIndex]} alt={`Screenshot ${imageIndex + 1} of ${project.title}`} /></a> : images[imageIndex] ? <img src={images[imageIndex]} alt={`Screenshot ${imageIndex + 1} of ${project.title}`} /> : null}
+      <span>{project.featured ? '✳ featured' : project.category}</span>
+      {images.length > 1 && <><button className="wall-carousel-button previous" type="button" onClick={() => selectImage(imageIndex - 1)} aria-label={`Show previous screenshot of ${project.title}`}>←</button><button className="wall-carousel-button next" type="button" onClick={() => selectImage(imageIndex + 1)} aria-label={`Show next screenshot of ${project.title}`}>→</button><div className="wall-carousel-dots" aria-label={`${project.title} screenshots`}>{images.map((image, index) => <button className={index === imageIndex ? 'active' : ''} type="button" onClick={() => selectImage(index)} aria-label={`Show screenshot ${index + 1} of ${project.title}`} aria-current={index === imageIndex ? 'true' : undefined} key={image} />)}</div></>}
+    </div>
+    <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div><div className="wall-card-links">{project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer">view live ↗</a>}{project.repository_url && <a href={project.repository_url} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div></div>
   </article>;
 }
