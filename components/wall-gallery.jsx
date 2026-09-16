@@ -205,8 +205,17 @@ function ProjectCard({ project }) {
 
   const react = async (reaction) => {
     if (reactionBusy) return;
+    const previousCounts = reactionCounts;
+    const previousSelection = selectedReaction;
+    const nextSelection = previousSelection === reaction ? null : reaction;
+    const nextCounts = { ...previousCounts };
+    if (previousSelection) nextCounts[previousSelection] = Math.max(0, (nextCounts[previousSelection] || 0) - 1);
+    if (nextSelection) nextCounts[nextSelection] = (nextCounts[nextSelection] || 0) + 1;
+
     setReactionBusy(true);
     setReactionError('');
+    setReactionCounts(nextCounts);
+    setSelectedReaction(nextSelection);
     try {
       const response = await fetch(`/api/wall/projects/${project.id}/reaction`, {
         method: 'POST',
@@ -218,6 +227,8 @@ function ProjectCard({ project }) {
       setReactionCounts(data.counts);
       setSelectedReaction(data.selected);
     } catch (error) {
+      setReactionCounts(previousCounts);
+      setSelectedReaction(previousSelection);
       setReactionError(error.message || 'Your reaction could not be saved.');
     } finally {
       setReactionBusy(false);
@@ -230,6 +241,6 @@ function ProjectCard({ project }) {
       <span>{project.featured ? '✳ featured' : project.category}</span>
       {images.length > 1 && <><button className="wall-carousel-button previous" type="button" onClick={() => selectImage(imageIndex - 1)} aria-label={`Show previous screenshot of ${project.title}`}>←</button><button className="wall-carousel-button next" type="button" onClick={() => selectImage(imageIndex + 1)} aria-label={`Show next screenshot of ${project.title}`}>→</button><div className="wall-carousel-dots" aria-label={`${project.title} screenshots`}>{images.map((image, index) => <button className={index === imageIndex ? 'active' : ''} type="button" onClick={() => selectImage(index)} aria-label={`Show screenshot ${index + 1} of ${project.title}`} aria-current={index === imageIndex ? 'true' : undefined} key={image} />)}</div></>}
     </div>
-    <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div><div className="wall-reactions" aria-label={`React to ${project.title}`}>{reactionOptions.map(({ type, emoji, label }) => <button className={selectedReaction === type ? 'active' : ''} type="button" aria-pressed={selectedReaction === type} aria-label={`${label}: ${reactionCounts[type] || 0}`} disabled={reactionBusy} onClick={() => react(type)} key={type}><span aria-hidden="true">{emoji}</span><strong>{reactionCounts[type] || 0}</strong></button>)}</div>{reactionError && <p className="wall-reaction-error" role="alert">{reactionError}</p>}<div className="wall-card-links">{project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer">view live ↗</a>}{project.repository_url && <a href={project.repository_url} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div></div>
+    <div className="wall-card-copy"><div><p className="eyebrow">BY {project.builder_name.toUpperCase()}</p></div><h2>{project.title}</h2><p>{project.short_description}</p><div className="wall-stack">{project.stack.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div><div className="wall-reactions" aria-label={`React to ${project.title}`} aria-busy={reactionBusy}>{reactionOptions.map(({ type, emoji, label }) => <button className={selectedReaction === type ? 'active' : ''} type="button" aria-pressed={selectedReaction === type} aria-label={`${label}: ${reactionCounts[type] || 0}`} disabled={reactionBusy} onClick={() => react(type)} key={type}><span aria-hidden="true">{emoji}</span><strong>{reactionCounts[type] || 0}</strong></button>)}</div>{reactionError && <p className="wall-reaction-error" role="alert">{reactionError}</p>}<div className="wall-card-links">{project.live_url && <a href={project.live_url} target="_blank" rel="noopener noreferrer">view live ↗</a>}{project.repository_url && <a href={project.repository_url} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}</div></div>
   </article>;
 }

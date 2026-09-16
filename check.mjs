@@ -74,6 +74,8 @@ if (serverBuild) {
   assert(wall.includes('wall-image-preview') && wall.includes('removeImage'));
   assert(wall.includes('wall-carousel-button') && wall.includes('GitHub ↗'));
   assert(wall.includes('❤️') && wall.includes('🙋') && wall.includes('wall-reactions'));
+  assert(wall.includes('const nextCounts = { ...previousCounts };'));
+  assert(wall.includes('setReactionCounts(nextCounts);'));
   assert(wall.includes('const form = event.currentTarget;'));
   assert(controlRoom.includes('/api/control-room/login'));
   assert(controlRoom.includes('const form = event.currentTarget;'));
